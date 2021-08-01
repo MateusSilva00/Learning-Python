@@ -1,2 +1,4 @@
 # Learning-Python
-Some new stuff in my Python Stuff
+Python is cool
+Python is for everyone
+
