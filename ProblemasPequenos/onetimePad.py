@@ -2,7 +2,7 @@ from secrets import token_bytes
 from typing import Tuple
 
 def randomKey(lengh: int) -> int:
-    tb: bytes = token_bytes(lengh);
+    tb: bytes = token_bytes(lengh)
     # Convertendo bytes em uma cadeia de bits
     return int.from_bytes(tb, "big")
 

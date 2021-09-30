@@ -4,7 +4,7 @@ def calcPi(nTerms: int) -> float:
     operacao: float = 1.0
     pi: float = 0.0
 
-    # Definição de Leibniz
+    # Leibniz definition
     for _ in range(nTerms):
         pi += operacao * (numerador / demoninador)
         demoninador += 2.0
