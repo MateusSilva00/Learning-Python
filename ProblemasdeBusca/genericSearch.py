@@ -39,6 +39,121 @@ def binarySearch(sequence, key) -> bool:
             return True
     return False
 
+class Stack(Generic[T]):
+    def __init__(self):
+        self._container: List[T] = []
+
+    @property
+    def empty(self) -> bool:
+        return not self._container 
+
+    def push(self, item) -> None:
+        self._container.append(item)
+
+    def pop(self) -> T:
+        return self._container.pop() 
+
+    def __repr__(self) -> str:
+        return repr(self._container)
+
+class Node(Generic[T]):
+    def __init__(self, state, parent: Optional[Node], cost:float = 0.0, heuristic: float = 0.0) -> None:
+        self.state = state
+        self.parent = parent
+        self.cost = cost
+        self.heuristic = heuristic
+
+    def __lt__(self, other: Node) -> bool:
+        return (self.cost + self.heuristic) < (other.cost + other.heuristic)
+
+
+def dfs(initial, goalTest: Callable[[T], bool], successors:Callable[[T], List[T]]) -> Optional[Node[T]]:
+  
+    frontier: Stack[Node[T]] = Stack()
+    frontier.push(Node(initial, None))
+
+    explored: Set[T] = {initial}
+
+
+    while not frontier.empty:
+        currentNode: Node[T] = frontier.pop()
+        currentState: T = currentNode.state
+
+        if goalTest(currentState):
+            return currentNode
+        for child in successors(currentState):
+            if child in explored: 
+                continue
+            explored.add(child)
+            frontier.push(Node(child, currentNode))
+    return None  
+
+
+def nodeToPath(node: Node[T]) -> List[T]:
+    path: List[T] = [node.state]
+   
+    while node.parent is not None:
+        node = node.parent
+        path.append(node.state)
+    path.reverse()
+    return path
+
+
+class Queue(Generic[T]):
+    def __init__(self):
+        self._container: Deque[T] = Deque()
+
+    @property
+    def empty(self) -> bool:
+        return not self._container  
+
+    def push(self, item) -> None:
+        self._container.append(item)
+
+    def pop(self) -> T:
+        return self._container.popleft()  
+
+    def __repr__(self) -> str:
+        return repr(self._container)
+
+
+def bfs(initial, goalTest: Callable[[T], bool], successors:Callable[[T], List[T]]) -> Optional[Node[T]]:
+    frontier: Queue[Node[T]] = Queue()
+    frontier.push(Node(initial, None))
+    explored: Set[T] = {initial}
+    
+    while not frontier.empty:
+        current_node: Node[T] = frontier.pop()
+        current_state: T = current_node.state
+       
+        if goalTest(current_state):
+            return current_node
+   
+        for child in successors(current_state):
+            if child in explored:  
+                continue
+            explored.add(child)
+            frontier.push(Node(child, current_node))
+    return None  
+
+
+class PriorityQueue(Generic[T]):
+    def __init__(self) -> None:
+        self._container: List[T] = []
+
+    @property
+    def empty(self) -> bool:
+        return not self._container  
+
+    def push(self, item: T) -> None:
+        heappush(self._container, item)  
+
+    def pop(self) -> T:
+        return heappop(self._container)  
+
+    def __repr__(self) -> str:
+        return repr(self._container)
+
 if __name__ == "__main__":
     print(linearSearch([1,5,15,15,15,15,20], 5))
     print(binarySearch(["a", "d", "e", "f", "z"], "f"))
