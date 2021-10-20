@@ -1,76 +1,151 @@
-from enum import Enum
-import random
-from typing import NamedTuple
-from PIL import Image, ImageDraw
+import turtle
+import time
+import sys
+from collections import deque
 
-zoom = 20
-borders = 6
+window = turtle.Screen()
+window.bgcolor("black")
+window.title("A Breadth First Search for Maze Solving")
+window.setup(800, 800)
 
-class Cell(str, Enum):
-    EMPTY = "0"
-    BLOCKED = "1"
-    START = "O"
-    END = "[]"
-    PATH = "*"
+class Maze(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("white")
+        self.penup()
+        self.speed(0)
 
-class MazeLocation(NamedTuple):
-    row: int
-    column: int
+class Green(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("green")
+        self.penup()
+        self.speed(0)
 
-class Maze:
-    def __init__(self, rows=10, columns = 20, start = MazeLocation(0, 0), end = MazeLocation(9, 19), sparseness = 0.2):
-        self._rows = rows
-        self._column = columns
-        self.start = start
-        self.end = end
-        self._grid = [[Cell.EMPTY for c in range(columns)] for r in range(rows)]
-        self.randomFill(rows, columns, sparseness)
-        # self._grid[start.row][start.column] = Cell.START
-        # self._grid[end.row][end.column] = Cell.END
+class Red(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("circle")
+        self.color("red")
+        self.penup()
+        self.speed(0)
 
-    def randomFill(self, rows, columns, sparseness):
-        for row in range(rows):
-            for column in range(columns):
-                if row == 0 or row == 9:
-                    self._grid[row][column] = Cell.BLOCKED
-                if column == 0 or column == 19:
-                    self._grid[row][column] = Cell.BLOCKED
-                if random.uniform(0, 1.0) < sparseness:
-                    self._grid[row][column] = Cell.BLOCKED
-    
-    def __str__(self) -> str:
-        output = ""
-        for row in self._grid:
-            output += "".join([c.value for c in row]) + "\n"
-        return output
-    
-    def goalTest(self, ml: MazeLocation) -> bool:
-        return ml == self.goal
 
-def drawMatriz(a):
-    im = Image.new("RGB", (zoom * len(a[0]), zoom * len(a)), (255, 255, 255))
-    draw = ImageDraw.Draw(im)
-    draw.show()
+class Yellow(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("arrow")
+        self.color("yellow")
+        self.penup()
+        self.speed(0)
+
+
+grid = [
+    "++++++++++++++++++++++++++",
+    "+s+           +++++++    +",
+    "+ +                      +",
+    "+ +       ++++   ++  +++++",
+    "+ +       +              +",
+    "+ +       ++++    +      +",
+    "+ +     +++       +    +++",
+    "+                 +   + g+",
+    "+++++++           +     ++",
+    "++++++       ++++++      +",
+    "+                        +",
+    "++++++++++++++++++++++++++",
+]
+
+def makeMaze(grid):
+    global startX, startY, endX, endY
+    for i in range(len(grid)):
+        for j in range(len(grid[i])):
+            char = grid[i][j]
+            screenX = -188 + (i * 24)
+            screenY = 288 - (j * 24)
+
+            if char == '+':
+                maze.goto(screenX, screenY)
+                maze.stamp()
+                walls.append((screenX, screenY))
+
+            if char == ' '  or char == 'e':
+                path.append((screenX, screenY))
+            
+            if char == 'g':
+                green.color("purple")
+                green.goto(screenX, screenY)
+                endX, endY = screenX, screenY
+                green.stamp()
+                green.color("green")
+            
+            if char == 's':
+                startX, startY = screenX, screenY
+                red.goto(screenX, screenY)            
+            
+
+def endProgram():
+    window.exitonclick()
+    sys.exit()
+
+
+def breadthSearch(x, y):
+    frontier.append((x, y))
+    solution[x, y] = x, y
+
+    while len(frontier) > 0:
+        time.sleep(0)
+        x, y = frontier.popleft()
+
+        if(x - 24, y) in path and (x - 24, y) not in visited:  
+            cell = (x - 24, y)
+            solution[cell] = x, y
+            frontier.append(cell)  
+            visited.add((x-24, y)) 
+
+        if (x, y - 24) in path and (x, y - 24) not in visited:
+            cell = (x, y - 24)
+            solution[cell] = x, y
+            frontier.append(cell)
+            visited.add((x, y - 24))
+
+        if(x + 24, y) in path and (x + 24, y) not in visited:   
+            cell = (x + 24, y)
+            solution[cell] = x, y
+            frontier.append(cell)
+            visited.add((x + 24, y))
+
+        if(x, y + 24) in path and (x, y + 24) not in visited:  
+            cell = (x, y + 24)
+            solution[cell] = x, y
+            frontier.append(cell)
+            visited.add((x, y + 24))
+        green.goto(x, y)
+        green.stamp()
+
+
+def wayHome(x, y):
+    yellow.goto(x, y)
+    yellow.stamp()
+    while (x, y) != (startX, startY):
+        yellow.goto(solution[x, y])
+        yellow.stamp()
+        x, y = solution[x, y]
 
 if __name__ == "__main__":
-    a = [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ]
     maze = Maze()
-    print(maze)
-    drawMatriz(maze)
+    red = Red()
+    green = Green()
+    yellow = Yellow()
+
+    walls = []
+    path = []
+    visited = set()
+    frontier = deque()
+    solution = {}
+
+    makeMaze(grid)
+    breadthSearch(startX, startY)
+    # wayHome(endX, endY)
+    endProgram()
