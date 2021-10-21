@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, NamedTuple, Callable, Optional
 import random 
 from math import sqrt
-from genericSearch import dfs, bfs, nodeToPath, Node
+from genericSearch import astar, dfs, bfs, nodeToPath, Node
 
 class Cell(str, Enum):
     EMPTY = "   "
@@ -70,6 +70,21 @@ class Maze:
         self._grid[self.goal.row][self.goal.column] = Cell.GOAL
 
 
+def euclideanDistance(goal) -> Callable[[MazeLocation], float]:
+    def distance(ml):
+        xDist = ml.column - goal.column
+        yDist = ml.row - goal.row
+        return sqrt((xDist * xDist) + (yDist * yDist))
+    return distance
+
+def manhattanDistance(goal) -> Callable[[MazeLocation], float]:
+    def distance(ml):
+        xDist = abs(ml.column - goal.column)
+        yDist = abs(ml.row - goal.row)
+        return (xDist + yDist)
+    return distance
+    
+
 if __name__ == "__main__":
     maze = Maze()
     print(maze)
@@ -90,4 +105,14 @@ if __name__ == "__main__":
     else:
         path2 = nodeToPath(solution2)
         maze.mark(path2) 
+        print(maze)
+
+
+    distance = manhattanDistance(maze.goal)
+    solution3 = astar(maze.start, maze.goalTest,  maze.sucessors, distance)
+    if solution3 is None:
+        print("No solution found using A* algorithm")
+    else:
+        path3 = nodeToPath(solution3)
+        maze.mark(path3)
         print(maze)

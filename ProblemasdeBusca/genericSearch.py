@@ -154,6 +154,25 @@ class PriorityQueue(Generic[T]):
     def __repr__(self) -> str:
         return repr(self._container)
 
+
+def astar(initial, goalTest, sucessors: Callable[[T], List[T]], heuristic) -> Optional[Node[T]]:
+    # Lugares que devemos visitar
+    frontier = PriorityQueue()
+    frontier.push(Node(initial, None, 0.0, heuristic(initial)))
+    explored = {initial: 0.0}
+
+    while not frontier.empty:
+        currentNode = frontier.pop()
+        currentState = currentNode.state
+        if goalTest(currentState):
+            return currentNode # Se encontrar o caminho
+        for child in sucessors(currentState):
+            newCost = currentNode.cost + 1
+            if child not in explored or explored[child] > newCost:
+                explored[child] = newCost
+                frontier.push(Node(child, currentNode, newCost, heuristic(child)))
+    return None # Passou por todos lugares e não encontrou o objetivo
+
 if __name__ == "__main__":
     print(linearSearch([1,5,15,15,15,15,20], 5))
     print(binarySearch(["a", "d", "e", "f", "z"], "f"))
