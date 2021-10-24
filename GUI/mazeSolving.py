@@ -6,7 +6,7 @@ from collections import deque
 window = turtle.Screen()
 window.bgcolor("black")
 window.title("A Breadth First Search for Maze Solving")
-window.setup(800, 800)
+window.setup(800, 450)
 
 class Maze(turtle.Turtle):
     def __init__(self):
@@ -42,7 +42,7 @@ class Yellow(turtle.Turtle):
         self.speed(0)
 
 
-grid = [
+graph = [
     "++++++++++++++++++++++++++",
     "+s+           +++++++    +",
     "+ +                      +",
@@ -57,34 +57,32 @@ grid = [
     "++++++++++++++++++++++++++",
 ]
 
-def makeMaze(grid):
+def makeMaze(graph):
     global startX, startY, endX, endY
-    for i in range(len(grid)):
-        for j in range(len(grid[i])):
-            char = grid[i][j]
-            screenX = -188 + (i * 24)
-            screenY = 288 - (j * 24)
+    for j in range(len(graph)):
+        for i in range(len(graph[j])):
+            char = graph[j][i]
+            screenX = -300 + (i * 24)
+            screenY = 150 - (j * 24)
 
             if char == '+':
                 maze.goto(screenX, screenY)
                 maze.stamp()
                 walls.append((screenX, screenY))
 
-            if char == ' '  or char == 'e':
+            if char == ' '  or char == 'g':
                 path.append((screenX, screenY))
-            
-            if char == 'g':
-                green.color("purple")
-                green.goto(screenX, screenY)
-                endX, endY = screenX, screenY
-                green.stamp()
-                green.color("green")
-            
+                if char == 'g':
+                    green.color("purple")
+                    green.goto(screenX, screenY)
+                    endX, endY = screenX, screenY
+                    green.stamp()
+                    green.color("green")
+
             if char == 's':
                 startX, startY = screenX, screenY
                 red.goto(screenX, screenY)            
             
-
 def endProgram():
     window.exitonclick()
     sys.exit()
@@ -93,30 +91,34 @@ def endProgram():
 def breadthSearch(x, y):
     frontier.append((x, y))
     solution[x, y] = x, y
-
-    while len(frontier) > 0:
+    goal = endX, endY
+    while len(frontier) > 0  or goal not in visited:
         time.sleep(0)
         x, y = frontier.popleft()
 
-        if(x - 24, y) in path and (x - 24, y) not in visited:  
+        # Verifica cédulas à esquerda
+        if(x - 24, y) in path and (x - 24, y) not in visited:
             cell = (x - 24, y)
             solution[cell] = x, y
-            frontier.append(cell)  
-            visited.add((x-24, y)) 
+            frontier.append(cell)
+            visited.add((x-24, y))
 
+        # Verifica cédulas à abaixo
         if (x, y - 24) in path and (x, y - 24) not in visited:
             cell = (x, y - 24)
             solution[cell] = x, y
             frontier.append(cell)
             visited.add((x, y - 24))
 
-        if(x + 24, y) in path and (x + 24, y) not in visited:   
+        # Verifica cédulas à direita
+        if(x + 24, y) in path and (x + 24, y) not in visited:
             cell = (x + 24, y)
             solution[cell] = x, y
             frontier.append(cell)
             visited.add((x + 24, y))
 
-        if(x, y + 24) in path and (x, y + 24) not in visited:  
+        # Verifica cédulas à acima
+        if(x, y + 24) in path and (x, y + 24) not in visited:
             cell = (x, y + 24)
             solution[cell] = x, y
             frontier.append(cell)
@@ -124,14 +126,55 @@ def breadthSearch(x, y):
         green.goto(x, y)
         green.stamp()
 
+def depthSearch(x, y):
+    
+    frontier.append((x, y))
+    solution[x, y] = x, y
+    goal = endX, endY
+
+    while len(frontier) > 0 and goal not in visited:
+        time.sleep(0)
+        x, y = frontier.pop()
+
+        if (x - 24, y) in path and (x - 24,  y) not in visited:
+            visited.add((x-24, y))
+            cell = (x - 24, y)
+            solution[cell] = x, y
+            frontier.append(cell)
+
+        if (x + 24, y) in path and (x + 24, y) not in visited:
+            visited.add((x + 24, y))
+            cell = (x + 24, y)
+            solution[cell] = x, y
+            frontier.append(cell)
+
+        if (x, y + 24) in path and (x, y + 24) not in visited:
+            visited.add((x, y + 24))
+            cell = (x, y + 24)
+            solution[cell] = x, y
+            frontier.append(cell)
+
+        if (x, y - 24) in path and (x, y - 24) not in visited:
+            visited.add((x, y - 24))
+            cell = (x, y - 24)
+            solution[cell] = x, y
+            frontier.append(cell)
+        
+        green.goto(x, y)
+        green.stamp()
+
 
 def wayHome(x, y):
     yellow.goto(x, y)
     yellow.stamp()
-    while (x, y) != (startX, startY):
-        yellow.goto(solution[x, y])
+    while (x, y) != (startX, startY):   
+        yellow.goto(solution[x, y])       
         yellow.stamp()
-        x, y = solution[x, y]
+        x, y = solution[x, y] 
+    time.sleep(2)
+    green.clear()
+    yellow.clear()
+    
 
 if __name__ == "__main__":
     maze = Maze()
@@ -145,7 +188,11 @@ if __name__ == "__main__":
     frontier = deque()
     solution = {}
 
-    makeMaze(grid)
+    makeMaze(graph)
     breadthSearch(startX, startY)
-    # wayHome(endX, endY)
+    wayHome(endX, endY)
+    time.sleep(5)
+
+    depthSearch(startX, startY)
+    wayHome(endX, endY)
     endProgram()
