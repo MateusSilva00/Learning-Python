@@ -5,7 +5,7 @@ from collections import deque
 
 window = turtle.Screen()
 window.bgcolor("black")
-window.title("A Breadth First Search for Maze Solving")
+window.title("Breadth Search vs Depth Search")
 window.setup(800, 450)
 
 class Maze(turtle.Turtle):
@@ -16,11 +16,18 @@ class Maze(turtle.Turtle):
         self.penup()
         self.speed(0)
 
-class Green(turtle.Turtle):
+class Title(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.penup()
+        self.color("white")
+        self.speed(0)
+
+class Toy(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
         self.shape("square")
-        self.color("green")
+        self.color("green", "black")
         self.penup()
         self.speed(0)
 
@@ -32,7 +39,6 @@ class Red(turtle.Turtle):
         self.penup()
         self.speed(0)
 
-
 class Yellow(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
@@ -41,8 +47,17 @@ class Yellow(turtle.Turtle):
         self.penup()
         self.speed(0)
 
+class Purple(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("purple")
+        self.penup()
+        self.speed(0)
+
 
 graph = [
+    "            -             ",
     "++++++++++++++++++++++++++",
     "+s+           +++++++    +",
     "+ +                      +",
@@ -65,6 +80,10 @@ def makeMaze(graph):
             screenX = -300 + (i * 24)
             screenY = 150 - (j * 24)
 
+            if char == '-':
+                title.hideturtle()
+                title.goto(screenX, screenY)
+
             if char == '+':
                 maze.goto(screenX, screenY)
                 maze.stamp()
@@ -73,11 +92,9 @@ def makeMaze(graph):
             if char == ' '  or char == 'g':
                 path.append((screenX, screenY))
                 if char == 'g':
-                    green.color("purple")
-                    green.goto(screenX, screenY)
+                    purple.goto(screenX, screenY)
+                    purple.stamp()
                     endX, endY = screenX, screenY
-                    green.stamp()
-                    green.color("green")
 
             if char == 's':
                 startX, startY = screenX, screenY
@@ -87,8 +104,8 @@ def endProgram():
     window.exitonclick()
     sys.exit()
 
-
 def breadthSearch(x, y):
+    title.write("Breadth First Search", align="center", font=("Arial", 12, "bold"))
     frontier.append((x, y))
     solution[x, y] = x, y
     goal = endX, endY
@@ -123,11 +140,11 @@ def breadthSearch(x, y):
             solution[cell] = x, y
             frontier.append(cell)
             visited.add((x, y + 24))
-        green.goto(x, y)
-        green.stamp()
+        toy.goto(x, y)
+        toy.stamp()
 
 def depthSearch(x, y):
-    
+    title.write("Depth First Search", align="center", font=("Arial", 12, "bold"))
     frontier.append((x, y))
     solution[x, y] = x, y
     goal = endX, endY
@@ -160,8 +177,8 @@ def depthSearch(x, y):
             solution[cell] = x, y
             frontier.append(cell)
         
-        green.goto(x, y)
-        green.stamp()
+        toy.goto(x, y)
+        toy.stamp()
 
 
 def wayHome(x, y):
@@ -171,16 +188,25 @@ def wayHome(x, y):
         yellow.goto(solution[x, y])       
         yellow.stamp()
         x, y = solution[x, y] 
+
+
+def clearMaze():
     time.sleep(2)
-    green.clear()
+    toy.clear()
     yellow.clear()
+    visited.clear()
+    frontier.clear()
+    solution.clear()
+    title.clear()
     
 
 if __name__ == "__main__":
     maze = Maze()
+    title = Title()
     red = Red()
-    green = Green()
+    toy = Toy()
     yellow = Yellow()
+    purple = Purple()
 
     walls = []
     path = []
@@ -191,7 +217,8 @@ if __name__ == "__main__":
     makeMaze(graph)
     breadthSearch(startX, startY)
     wayHome(endX, endY)
-    time.sleep(5)
+    clearMaze()
+    time.sleep(3)
 
     depthSearch(startX, startY)
     wayHome(endX, endY)
