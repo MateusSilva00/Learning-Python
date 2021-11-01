@@ -29,7 +29,7 @@ class Toy(turtle.Turtle):
         self.shape("square")
         self.color("green", "black")
         self.penup()
-        self.speed(0)
+        self.speed(3)
 
 class Red(turtle.Turtle):
     def __init__(self):
@@ -65,10 +65,10 @@ graph = [
     "+ +       +              +",
     "+ +       ++++    +      +",
     "+ +     +++       +    +++",
-    "+                 +   + g+",
+    "+                 +   +  +",
     "+++++++           +     ++",
     "++++++       ++++++      +",
-    "+                        +",
+    "+g                       +",
     "++++++++++++++++++++++++++",
 ]
 
@@ -100,16 +100,13 @@ def makeMaze(graph):
                 startX, startY = screenX, screenY
                 red.goto(screenX, screenY)            
             
-def endProgram():
-    window.exitonclick()
-    sys.exit()
-
 def breadthSearch(x, y):
     title.write("Breadth First Search", align="center", font=("Arial", 12, "bold"))
     frontier.append((x, y))
     solution[x, y] = x, y
     goal = endX, endY
-    while len(frontier) > 0  or goal not in visited:
+
+    while len(frontier) > 0 and goal not in visited:
         time.sleep(0)
         x, y = frontier.popleft()
 
@@ -198,6 +195,11 @@ def clearMaze():
     frontier.clear()
     solution.clear()
     title.clear()
+
+
+def endProgram():
+    window.exitonclick()
+    sys.exit()
     
 
 if __name__ == "__main__":
